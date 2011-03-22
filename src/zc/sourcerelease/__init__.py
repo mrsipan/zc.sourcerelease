@@ -57,6 +57,11 @@ def source_release(args=None):
     parser = optparse.OptionParser()
     parser.add_option("-n", "--name", dest="filename",
         help="create custom named files", default="None")
+    parser.add_option("-s", "--symlinks", dest="symlinks",
+        help="if true, symbolic links result in symbolic links in the "
+             "destination; if false, the contents of the files pointed "
+             "to by symbolic links are copied.",
+        action="store_true", default=False)
 
     # retrieve options
     (options, args) = parser.parse_args(args)
@@ -86,10 +91,13 @@ def source_release(args=None):
     try:
 
         if url.startswith('file://'):
-            shutil.copytree(urlparse.urlparse(url)[2], co1)
+            shutil.copytree(
+                urlparse.urlparse(url)[2], co1,
+                symlinks=options.symlinks
+                )
         else:
             _system('svn', 'export', url, co1)
-        shutil.copytree(co1, co2)
+        shutil.copytree(co1, co2, symlinks=options.symlinks)
         cache = os.path.join(co2, 'release-distributions')
         os.mkdir(cache)
         buildout = zc.buildout.buildout.Buildout(
@@ -123,7 +131,8 @@ def source_release(args=None):
         for dist in dists:
             if os.path.isdir(dist):
                 shutil.copytree(dist,
-                                os.path.join(eggs, os.path.basename(dist))
+                                os.path.join(eggs, os.path.basename(dist)),
+                                symlinks=options.symlinks
                                 )
             else:
                 shutil.copy(dist, eggs)
