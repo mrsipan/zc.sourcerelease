@@ -131,7 +131,7 @@ def source_release(args=None):
             dists = []
 
         eggs = os.path.join(co2, reggs)
-        # os.mkdir(eggs)
+
         for dist in dists:
             if os.path.isdir(dist):
                 shutil.copytree(dist,
