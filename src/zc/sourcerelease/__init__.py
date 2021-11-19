@@ -19,7 +19,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
-import urlparse
+import urllib.parse as urlparse
 
 import pkg_resources
 
@@ -86,7 +86,7 @@ def source_release(args=None):
     co1 = os.path.join(t1, name)
     co2 = os.path.join(t2, name)
     here = os.getcwd()
-    print 'Creating source release in %s.tgz' % name
+    print('Creating source release in %s.tgz' % name)
     sys.stdout.flush()
     try:
 
@@ -107,8 +107,8 @@ def source_release(args=None):
         eggs_directory = buildout['buildout']['eggs-directory']
         reggs = _relative(eggs_directory, co1)
         if reggs is None:
-            print 'Invalid eggs directory (perhaps not a relative path)', \
-                eggs_directory
+            print('Invalid eggs directory (perhaps not a relative path)', \
+                eggs_directory)
             sys.exit(0)
 
         buildout.bootstrap([])
@@ -123,11 +123,15 @@ def source_release(args=None):
         os.chdir(here)
 
         env = pkg_resources.Environment([eggs_directory])
-        dists = [env[project][0].location
-                 for project in ('zc.buildout', 'setuptools')]
+
+        try:
+            dists = [env[project][0].location
+                     for project in ('zc.buildout', 'setuptools')]
+        except Exception:
+            dists = []
 
         eggs = os.path.join(co2, reggs)
-        os.mkdir(eggs)
+        # os.mkdir(eggs)
         for dist in dists:
             if os.path.isdir(dist):
                 shutil.copytree(dist,
@@ -161,8 +165,8 @@ install_template = """
 import os, sys
 
 if sys.version_info[:2] != %(version)r:
-    print "Invalid Python version, %%s.%%s." %% sys.version_info[:2]
-    print "Python %%s.%%s is required." %% %(version)r
+    print("Invalid Python version, %%s.%%s." %% sys.version_info[:2])
+    print("Python %%s.%%s is required." %% %(version)r)
     sys.exit(1)
 
 here = os.path.abspath(os.path.dirname(__file__))
